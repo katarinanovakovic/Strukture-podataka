@@ -1,242 +1,281 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#define MAX_NAME 50
 
-#define MAX 10
-#define CRT_SECUR_NO_WARNINGS
-#define MAX_SIZE 50
+typedef struct osoba* Person;
+typedef struct osoba {
+    char ime[MAX_NAME];
+    char prezime [MAX_NAME];
+    int godina;
+    Person next;
+}osoba;
 
-struct _person;
-typedef struct _person* position;
+int DodajNaPocetak(Person head);
+Person Alociraj();
+int Print(Person prvi);
+int DodajNaKraj(Person head);
+Person Trazi(Person head);
+int Brisi(Person head);
 
-typedef struct _person {
-	char name[MAX_SIZE];
-	char surname[MAX_SIZE];
-	int year;
-	position next;
+//za 3. zadatak
 
-}person;
+int DodajIspred(Person odredjeni);
+Person TraziPrethodnog(Person head);
+int DodajIza(Person head);
+int UpisUDatoteku(Person head);
+int CitajIzDatoteke(Person head);
+int SortirajPoPrezimenu(Person head);
 
-int prepandlist(position head, char* name, char* surname, int year);
-int printlist(position first);
-position createperson(char* name, char* surname, int year);
-int insertafter(position pos, position newperson);
-position findlast(position head);
-int appendlist(position head, char* name, char* surname, int year); 
-position findbysurname(position first, char* surname);
-position findbefore(position first);
-int deleteperson(position head, position per);
-int save(position head, char * filename);
-int read(position head, char* buffer);
-int sortbysurname(position head);
-
-
-int main() {
-
-
-	person Head = {.name = {0}, .surname = {0}, .year = 0, .next = NULL};
-    position pHead = &Head;
-    person Ana, Marko;
-    position pAna= &Ana;
-	position pMarko = &Marko;
-    FILE *fp = NULL;
-
-    pAna = createperson("Ana", "Anic", 1999);
-    pMarko = createperson("Marko", "Markic", 1998);
-	
-
-    insertafter(pAna, pMarko);
-    printlist(pHead); 
-    prepandlist(pHead, "Ante", "Antic", 1997);
-    appendlist(pHead, "Mara", "Maric", 1996);
-    printf("\n\nIspis liste nakon unosa nove osobe na pocetak i na kraj liste:");
-    printlist(pHead);
-    save(pHead, fp);
-    sortbysurname(pHead);
-
-	return 0;
-}
-
-int prepandlist(position head, char* name, char* surname, int year) {
-
-	position newperson = NULL;
-	newperson = (position)malloc(sizeof(person));
-	if (!newperson) {
-		printf("Greska u alociranju memorije");
-	}
-
-	strcpy_s(newperson->name,10, name);
-	strcpy_s(newperson->surname, 10, surname);
-	newperson->year = year;
-	newperson->next = NULL;
-return EXIT_SUCCESS;
-}
-
-int printlist(position first) {
-	position temp = first; //argument treba ostat netaknut
-	while (temp) {
-	
-		printf("Name: %s, surname: %s, year: %d", temp->name, temp->surname, temp->year);
-		temp = temp->next;
-	}
-	return EXIT_SUCCESS;
-}
-
-position createperson(char* name, char* surname, int year) {
-	position newperson = NULL;
-
-	if (!newperson)
-	{
-		perror("Cant alocate memory");
-		//return -1;
-	}
-
-	strcpy_s(newperson->name,10, name);
-	strcpy_s(newperson->surname,10, surname);
-	newperson->year = year;
-	newperson->next = NULL;
-
-return newperson;
-}
-
-int insertafter(position pos, position newperson) {
-	newperson->next = pos->next;
-	pos->next = newperson;
-
-	return EXIT_SUCCESS;
-}
-
-position findlast(position head) {
-	position temp = head;
-
-	while (temp->next) {
-		temp = temp->next;
-	}
-
-	return temp;
-}
-
-
-int appendlist(position head, char* name, char* surname, int year) {
-	position newperson = NULL;
-	position last = NULL;
-
-	newperson = createperson(name, surname, year);
-
-	if (!newperson) {
-	
-		return -1;
-	}
-
-	last = findlast(head);
-	insertafter(last, newperson);
-
-	return EXIT_SUCCESS;
-}
-
-position findbysurname(position first, char* surname) {
-	position temp = first;
-
-	while (temp) {
-	
-		if (strcmp(temp->surname, surname)) {
-			return temp;
-		}
-
-	}
-	return EXIT_SUCCESS;
-
-}
-
-int deleteperson(position head, position per)
+int main()
 {
-	position P = head;
+    int br;
+    Person head=Alociraj();
+    Person odredjeni= Alociraj();
 
-	while (P != NULL && (P->next) != per) {
-		P = P->next;
-	}
 
-	if (P == NULL)
-		return -1;
-	else
-	{
-		P->next = P->next->next;
-		free(per);
-	}
+printf("Unesite br ");
+scanf("%d", &br);
 
-	return 0;
+switch (br)
+{
+case 1: DodajNaPocetak(head);
+    break;
+
+case 2: Print(head->next); 
+    break;
+
+case 3: DodajNaKraj(head);
+    break;
+
+case 4: Trazi(head);
+    break;
+
+case 5: Brisi(head);
+    break;
+
+case 6: 
+    odredjeni=Trazi(head);
+    DodajIspred(odredjeni);
+    break;
+
+case 7: DodajIza(head);
+        break;
+
+case 8: UpisUDatoteku(head);
+    break;
+
+case 9: CitajIzDatoteke(head);
+        break;
+
+case 10: SortirajPoPrezimenu(head);
+        break;
+
+default: printf("Pogresan broj");
 }
 
-int insertfront(position  head, position element)
-{
-    position P = head;
-    position newElement = (position)malloc(sizeof(position));
-
-    while (P != NULL && P->next != element)
-        P=P->next;
-
-    if (P == NULL) {
-        free(newElement);
-        return -1;
-    }
-
-    insertafter(P, createperson("Ana", "Anic", 12));
 
     return 0;
 }
 
-int save(position head, char* filename)
-{
-    position P = head->next;
-    FILE * fp = NULL;
-    fp = fopen(filename, "w");
 
-    if (fp==NULL)
-        return -1;
+int DodajNaPocetak(Person head){
+    Person New;
+    New= Alociraj();
+    printf("Unesite ime, prezime i godinu rodjenja");
+    scanf(" %s %s %d", &New->ime, &New->prezime, &New->godina);
+    New->next=head->next;
+    head->next= New;
 
-    while (P!=NULL) {
-        fprintf(fp, "Ime: %s, Prezime: %s, Godina rodenja: %d\n", P->name, P->surname, P->year);
-        P=P->next;
-    }
-
-    fclose(fp);
-
-    return 0;
+return 0;
 }
 
-int read(position head, char* buffer) {
-	FILE* fp = NULL;
-	fp = fopen("Person.txt", "r");
-	//char buffer[MAX_SIZE]={0};
-    char *name={0};
-    char *surname={0};
-    int year=0;
-    int i=0;
-    int n=0;
-	if (!fp) {
-		printf("Greska pri alociranju.\n");
-		return -1;
-	}
+Person Alociraj()
+{
+    Person NewP=NULL;
+    NewP=(Person)malloc(sizeof(struct osoba));
 
-	while (!feof(fp)) {
-		fscanf(fp, " %s %s %d\n", name, surname, &year);
-		appendlist(head, name, surname, year);
-	}
-
-    for(i=0; i<n-1; i++){
-        fgets(buffer, MAX_SIZE, fp);
-        printf("%s", buffer);
+    if(!NewP)
+    {
+        printf("Nije uspjelo!");
+        return NULL;
     }
-	fclose(fp);
-	return EXIT_SUCCESS;
+
+    strcpy(NewP->ime, " ");
+    strcpy(NewP->prezime, " ");
+    NewP->godina=0;
+    NewP->next=NULL;
+
+
 }
 
-int sortbysurname(position head)
+int Print(Person prvi)
+{   
+    while(prvi->next!=NULL)  
+    {
+        printf(" %c %c %d", prvi->ime, prvi->prezime, prvi->godina);
+        prvi=prvi->next;
+    }  
+ printf(" %c %c %d", prvi->ime, prvi->prezime, prvi->godina);
+ return 0;
+}
+
+int DodajNaKraj(Person head)
 {
-	position temp = head;
-	position q = NULL;
-	position p = NULL;
-	position last = NULL;
+    Person New;
+    New=Alociraj();
+
+    while(head->next!=NULL)
+    {
+        head=head->next;
+    }
+
+  /*  head->next=New;
+    New->next=NULL;*/
+
+    New->next=head->next;
+    head->next=New;
+
+return 0;
+}
+
+Person Trazi(Person head)
+{
+    char prez[MAX_NAME];
+
+    printf("Unesite prezime: ");
+    scanf(" %s",prez);
+
+    while(head->next!=NULL && strcmp(head->prezime,prez)!=0)
+    {
+        head=head->next;
+    }
+if(strcmp(head->prezime, prez)==0){
+    printf("Pronadjeno");
+    return head;
+}
+else printf("ne postoji");
+}
+
+
+Person TraziPrethodnog(Person head){
+    char prez[MAX_NAME];
+
+    printf("Unesite prezime: ");
+    scanf(" %s",prez);
+
+    while(head->next!=NULL && strcmp(head->next->next->prezime,prez)!=0)
+    {
+        head=head->next;
+    }
+if(strcmp(head->next->next->prezime, prez)==0){
+    printf("Pronadjeno");
+    return head;
+}
+else 
+printf("ne postoji");
+
+
+}
+
+
+int Brisi(Person head)
+{
+    Person Izb=NULL;
+    Izb=Trazi(head);
+
+while(head->next!=Izb)
+{
+    head=head->next;
+}
+
+head->next=Izb->next;
+free(Izb);
+
+return 0;
+}
+
+int DodajIspred(Person odredjeni)
+{
+Person NewP=Alociraj();
+NewP= TraziPrethodnog(odredjeni);
+if(NewP==NULL) {printf("greska");}
+else {
+     printf("Unesite ime, prezime i godinu rodjenja: ");
+    scanf(" %s %s %d", NewP->ime, NewP->prezime, &NewP->godina);
+     NewP->next= odredjeni->next;
+     odredjeni->next= NewP;   
+
+}
+
+return 0;
+}
+
+int DodajIza(Person head){
+    Person NewOdredjeni;
+    NewOdredjeni= Trazi(head);
+
+    Person Novi=Alociraj();
+
+    printf("Unesite podatke(ime, prezime, godina): ");
+    scanf(" %s %s %d", Novi->ime, Novi->prezime, &Novi->godina);
+    Novi->next=NewOdredjeni->next;
+    NewOdredjeni->next=Novi;
+
+}
+
+int UpisUDatoteku(Person head)
+{
+    Person temp= head->next;
+    FILE* fp=NULL;
+    fp=fopen("Novadatoteka.txt", "w");
+    if(!fp) 
+    {
+        printf("Greska pri otvaranju");
+         return -1;
+    }
+    
+    while(temp!=NULL){
+    fprintf(fp, " %s %s %d", temp->ime, temp->prezime, &temp->godina);
+    temp=temp->next;
+    }
+
+
+return 0;
+
+}
+
+int CitajIzDatoteke(Person head)
+{
+    Person temp=head->next;
+    Person NewP=NULL;
+
+    FILE* fp=NULL;
+    fp=fopen("datoteka.txt", "r");
+
+    if(!fp)
+    {
+         printf("Greska pri otvaranju!");
+         return -1;
+    }
+
+    while(!feof(fp))
+    {
+        NewP=Alociraj();
+        fscanf(fp, " %s %s %d", NewP->ime, NewP->prezime, &NewP->godina);
+        NewP->next=temp->next;
+        temp->next=NewP;
+        temp=temp->next; //pomicemo se na sljedeci u listi
+    }
+
+}
+
+int SortirajPoPrezimenu(Person head)
+{
+	Person temp = head;
+	Person q = NULL;
+	Person p = NULL;
+	Person last = NULL;
 
 	while (temp->next != last)
 	{
@@ -245,7 +284,7 @@ int sortbysurname(position head)
 
 		while (q->next != last)
 		{
-			if (strcmp(q->surname, q->next->surname) > 0)
+			if (strcmp(q->prezime, q->next->prezime) > 0)
 			{
 				p->next = q->next;
 				q->next = q->next->next;
