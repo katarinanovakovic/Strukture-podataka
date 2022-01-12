@@ -1,228 +1,198 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-struct _StackElement;
-typedef struct _StackElement *Position;
-typedef struct _StackElement
-{
-    double number;
-    Position next;
-} StackElement;
+#define _CRT_SECURE_NO_WARNINGS
+#include #include #include
+typedef struct StackElement* element;
+typedef struct StackElement {
+int number;
+element next;
+};
 
-Position CreateStackElement(double number);
-int InsertAfter(Position pozicija, Position newElement);
-int Push(Position head, double number);
-int DeleteAfter(Position pozicija);
-int Pop(double *destination, Position head);
-int preformOperation(Position head, char operation);
-int CalculatePostfixFile(double *destitnation, char *filename);
+element AllocateMemory();
+int ReadFile(element);
+int Pop(element);
+int Push(element,int);
+int PerformOperation(element,char);
 
 int main()
 {
+element head = AllocateMemory();
+int result = 0;
 
-    return 0;
+ReadFile(head);
+
+result = Pop(head);
+
+if (head->next != NULL)
+{
+perror("Error in postfix!\n");
+}
+else
+{
+printf("%d", result);
 }
 
-Position CreateStackElement(double number)
-{
-
-    Position newElement;
-    newElement = (Position)malloc(sizeof(StackElement));
-    if (!newElement)
-    {
-        perror("Cant alocate memory");
-        return NULL;
-    }
-
-    newElement->number = number;
-    newElement->next = NULL;
-
-    return newElement;
+return 0;
 }
 
-int InsertAfter(Position pozicija, Position newElement)
+element AllocateMemory()
 {
+element newElement = NULL;
 
-    newElement->next = pozicija->next;
-    pozicija->next = newElement;
+newElement = (element)malloc(sizeof(struct StackElement));
 
-    return EXIT_SUCCESS;
+if (!newElement)
+{
+perror("Error in creating a new element!\n");
+return -1;
 }
 
-int Push(Position head, double number)
-{
+newElement->number = 0;
+newElement->next = NULL;
 
-    Position newElement = NULL;
-    newElement = CreateStackElement(number);
-
-    if (!newElement)
-    {
-
-        return -1;
-    }
-
-    InsertAfter(head, newElement);
-
-    return EXIT_SUCCESS;
+return newElement;
 }
 
-int DeleteAfter(Position pozicija)
+int ReadFile(element head)
 {
-    Position temp = pozicija->next;
+int fileLenght = 0;
+char* buffer = NULL;
+char* currentbuffer = NULL;
+int status = 0;
+int number = 0;
+int numbytes = 0;
+char operator='\0';
+FILE* file = fopen("postfix.txt", "rb");
 
-    if (!temp)
-    {
-        return EXIT_SUCCESS;
-    }
-
-    pozicija->next = temp->next;
-    free(temp);
-
-    return EXIT_SUCCESS;
+if (!file)
+{
+perror("Cannot access the file!\n");
+return -2;
 }
 
-int Pop(double *destination, Position head)
+fseek(file, 0, SEEK_END);
+fileLenght = ftell(file);
+
+buffer = (char*)calloc(fileLenght + 1, sizeof(char));
+
+if (!buffer)
 {
-    Position first = head->next;
-    if (!first)
-    {
-        perror("Postix not valid. Please check your file!");
-        return -1;
-    }
-
-    *destination = first->number;
-    DeleteAfter(head);
-
-    return EXIT_SUCCESS;
+perror("Cannot allocate memory!\n");
+return -2;
 }
 
-int preformOperation(Position head, char operation)
-{
-    double operand2 = 0;
-    double operand1 = 0;
-    double result = 0;
-    int status1 = EXIT_SUCCESS;
-    int status2 = EXIT_SUCCESS;
-
-    status2 = Pop(&operand2, head);
-    if (status2 != EXIT_SUCCESS)
-    {
-        return -1;
-    }
-
-    status1 = Pop(&operand1, head);
-    if (status1 != EXIT_SUCCESS)
-    {
-        return -2;
-    }
-
-    switch (operation)
-    {
-    case '+':
-    {
-        result = operand1 + operand2;
-        break;
-    }
-
-    case '-':
-    {
-        result = operand1 -
-                 operand2;
-        break;
-    }
-
-    case '*':
-    {
-        result = operand1 * operand2;
-        break;
-    }
-
-    case '/':
-    {
-        if (operand2 == 0)
-        {
-            perror("Cannot");
-            return -3;
-        }
-        result = operand1 / operand2;
-        break;
-    }
-
-    default:
-        printf("This operand is not supported\n");
-        return -4;
-    }
-
-    Push(head, result);
-
-    return EXIT_SUCCESS;
-}
-
-int CalculatePostfixFile(double *destitnation, char *filename)
-{
-    FILE *file = NULL;
-    int fileLenght = 0;
-    char *buffer = NULL;
-    char *CBuffer = NULL;
-    int numBytes = 0;
-    double number = 0;
-    int status = 0;
-    StackElement head;
-    char operation={0};
-
-    file = fopen(filename, "rb");
-    if (!file)
-    {
-        perror("Can't open file");
-        return -1;
-    }
-
-    fseek(file, 0, SEEK_END);
-    fileLenght = ftell(file);
-
-    buffer = (char *)calloc(fileLenght + 1, sizeof(char));
-    if (!buffer)
-    {
-        perror("Cnat");
-        return 0;
-    }
-
-    rewind(file);
+rewind(file);
 fread(buffer, sizeof(char), fileLenght, file);
-printf(" %s", buffer);
+
 fclose(file);
 
-CBuffer = buffer;
+currentbuffer = buffer;
 
-while (strlen(CBuffer) < 0)
+while (strlen(currentbuffer) > 0)
 {
-    status = sscanf(CBuffer, "%lf %n", &number, &numBytes);
+status = sscanf(currentbuffer, " %d %n", &number, &numbytes);
 
-    if (status == 1)
-    {
-        Push(&head, number);
-        CBuffer += numBytes;
-    }
-    else
-    {
-        sscanf(CBuffer, "%c %n", &operation, &numBytes);
-        status = preformOperation(&head, operation);
+if (status == 1)
+{
+status=Push(head, number);
 
-        if (status != EXIT_SUCCESS)
-        {
-            free(buffer);
-            while (head.next != NULL)
-            {
-                DeleteAfter(&head);
-            }
-            return -1;
-        }
-        CBuffer += numBytes;
-    }
+if (status != 0)
+{
+perror("Error in postfix!\n");
+free(buffer);
+DeleteAll(head);
+return -3;
+}
+
+currentbuffer += numbytes;
+}
+else
+{
+status = sscanf(currentbuffer, " %c %n", &operator,&numbytes);
+status=PerformOperation(head, operator);
+
+if (status != 0)
+{
+perror("Error in postfix!\n");
+free(buffer);
+DeleteAll(head);
+return -3;
+}
+
+currentbuffer += numbytes;
+}
 }
 
 free(buffer);
 
-return EXIT_SUCCESS;
+return 0;
 }
 
+int Push(element head, int number)
+{
+element newElement = AllocateMemory();
+
+newElement->number = number;
+
+newElement->next = head->next;
+head->next = newElement;
+
+return 0;
+}
+
+int Pop(element head)
+{
+element deletedElement = NULL;
+int number = 0;
+
+deletedElement = head->next;
+head->next = deletedElement->next;
+number = deletedElement->number;
+free(deletedElement);
+
+return number;
+}
+
+int PerformOperation(element head, char operator)
+{
+int operand1 = 0;
+int operand2 = 0;
+int result = 0;
+
+operand2 = Pop(head);
+operand1 = Pop(head);
+
+switch (operator)
+{
+case '+':
+result = operand1 + operand2;
+break;
+case '-':
+result = operand1 - operand2;
+break;
+case '*':
+result = operand1 * operand2;
+break;
+case '/':
+result = operand1 / operand2;
+break;
+default:
+printf("Not valid operator!\n");
+}
+
+Push(head, result);
+
+return 0;
+}
+
+int DeleteAll(element head)
+{
+element deletedElement = NULL;
+
+while (head->next != NULL)
+{
+deletedElement->next = head->next;
+head->next = deletedElement;
+free(deletedElement);
+}
+
+return 0;
+}
