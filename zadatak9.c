@@ -42,23 +42,7 @@ int main()
         root = insert(root, a[i]);
     }
     print(root);
-
-
-    /*srand(time(NULL));
-    Position root = NULL;
-    int i = 0, x = 0;
-    root = (Position)malloc(sizeof(tree));
-    root->number = rand() % 80 + 10;
-    root->left = NULL;
-    root->right = NULL;
-    printf("%d ", root->number);
-    for(i = 1; i < 10; i++) {
-        x = rand() % 80 + 10;
-        printf("%d ", x);
-        root = Insert(root, x);
-    }
-    printf("\n");*/
-
+    
     EnterFileName(FileName);
 
     Print(root, &head);
