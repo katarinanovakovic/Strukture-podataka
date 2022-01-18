@@ -1,5 +1,7 @@
 #define _CRT_SECURE_NO_WARNINGS
-#include #include #include
+#include <stdio.h>
+#include <stdlib.h>
+
 typedef struct StackElement* element;
 typedef struct StackElement {
 int number;
